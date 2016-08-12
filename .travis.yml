@@ -45,4 +45,4 @@ before_script:
 
 script:
   - python -m unittest discover
-  - flake8 --config tests/flake8.cfg gaia tests
+  - flake8 --config tests/flake8.cfg gaia_spatialstats tests
