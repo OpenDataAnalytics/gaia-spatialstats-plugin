@@ -11,11 +11,16 @@ provides spatial statistics processes using PySAL, including:
 Installation
 -----------------
 
-.. git clone https://github.com/OpenDataAnalytics/gaia-spatialstats-plugin.git
-.. cd gaia-spatialstats-plugin
-.. pip install -e .
-.. pip install -r requirements
+- git clone https://github.com/OpenDataAnalytics/gaia-spatialstats-plugin.git
+- cd gaia-spatialstats-plugin
+- pip install -e .
+- pip install -r requirements
 
+
+Testing
+-----------------
+
+- python -m unittest discover
 
 
 Table of Contents
