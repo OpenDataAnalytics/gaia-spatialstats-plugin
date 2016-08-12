@@ -27,7 +27,8 @@ class Mock(MagicMock):
     def __getattr__(cls, name):
             return Mock()
 
-MOCK_MODULES = ['pysal', 'scipy', 'gaia']
+MOCK_MODULES = ['pysal', 'scipy', 'gdal',  'gdalconst', 'osgeo', 'ogr', 'osr',
+                'osgeo.gdal_array', 'numpy', 'pandas', 'geopandas', 'psycopg2']
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
 # -- General configuration ------------------------------------------------
