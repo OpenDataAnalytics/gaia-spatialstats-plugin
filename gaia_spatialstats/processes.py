@@ -198,8 +198,142 @@ class WeightProcess(GaiaProcess):
         self.output.write()
         logger.debug(self.output)
 
+
+class GearyCProcess(GaiaProcess):
+    """
+    Calculate Geary’s C statistic for spatial autocorrelation for the input data.
+    Default number of permutations = 999
+    Uses contiguity weight (queen) and binary transformation by default.
+    http://pysal.readthedocs.io/en/v1.11.0/library/esda/geary.html
+
+    Returns the following Geary's Cattributes as json:
+    C: float, value of Geary's C
+    EC: float, expected value of C
+    p_norm: float, p-value of C under normality assumption
+    EC_sim: float, average value of C from permutations (if permutations!=0)
+    p_sim: array, p-value based on permutations (one-tailed)
+    z_sim: float, standardized C based on permutations
+    p_z_sim: float, p-value based on standard normal approximation
+    from permutations (one-tailed)
+    """
+    required_inputs = (('input', formats.VECTOR),)
+    required_args = ('var_col')
+    optional_args = ('transformation', 'permutations')
+    default_output = formats.JSON
+    transformation = None
+    permutations = None
+
+    def __init__(self, var_col, **kwargs):
+        self.var_col = var_col
+        super(GearyCProcess, self).__init__(**kwargs)
+        if not self.output:
+            self.output = JsonFileIO(name='result',
+                                     uri=self.get_outpath())
+
+    def compute(self):
+        if not self.output:
+            self.output = VectorFileIO(name='result',
+                                       uri=self.get_outpath())
+        for input in self.inputs:
+            if input.name == 'input':
+                first_df = input.read()
+        col = self.var_col
+        transformation = self.transformation
+        permutations = self.permutations
+        if not permutations:
+            permutations = 999
+        if not transformation:
+            transformation = 'B'
+
+        # filter out null fields
+        keep = first_df[col].notnull()
+        filtered_df = first_df[keep]
+
+        # get Geary's C
+        f = np.array(filtered_df[col])
+        w = wt.gpd_contiguity(filtered_df)
+
+        c = pysal.esda.geary.Geary(y=f, w=w,
+                                   transformation=transformation,
+                                   permutations=permutations)
+
+        keep = ['C', 'EC','p_norm', 'EC_sim', 'p_sim', 'z_sim', 'p_z_sim']
+        c_dict = {k: getattr(c, k) for k in keep}
+        self.output.data = c_dict
+        self.output.write()
+        logger.debug(self.output)
+
+class GammaProcess(GaiaProcess):
+    """
+    Calculate Gamma index for spatial autocorrelation for the input data.
+    Default number of permutations = 999
+    Uses contiguity weight (queen), cross product similarity function.
+    http://pysal.readthedocs.io/en/v1.11.0/library/esda/gamma.html
+
+    Returns the following Gamma index attributes as json:
+    gamma: float, value of Gamma index
+    p_sim_g: array, p-value based on permutations (one-sided)
+    mean_g: float, average of permuted Gamma values
+    min_g: float, minimum of permuted Gamma values
+    max_g: float, maximum of permuted Gamma values
+    """
+    required_inputs = (('input', formats.VECTOR),)
+    required_args = ('var_col')
+    optional_args = ('operation', 'standardize', 'permutations')
+    default_output = formats.JSON
+    operation = None
+    permutations = None
+    standardize = None
+
+    def __init__(self, var_col, **kwargs):
+        self.var_col = var_col
+        super(GammaProcess, self).__init__(**kwargs)
+        if not self.output:
+            self.output = JsonFileIO(name='result',
+                                     uri=self.get_outpath())
+
+    def compute(self):
+        if not self.output:
+            self.output = VectorFileIO(name='result',
+                                       uri=self.get_outpath())
+        for input in self.inputs:
+            if input.name == 'input':
+                first_df = input.read()
+        col = self.var_col
+        permutations = self.permutations
+        operation = self.operation
+        standardize = self.standardize
+        if not permutations:
+            permutations = 999
+        if not operation:
+            operation = 'c'
+        if not standardize:
+            standardize = 'no'
+
+        # filter out null fields
+        keep = first_df[col].notnull()
+        filtered_df = first_df[keep]
+
+        # get Gamma's index
+        f = np.array(filtered_df[col])
+        w = wt.gpd_contiguity(filtered_df)
+
+        g = pysal.esda.gamma.Gamma(y=f, w=w,
+                                   operation=operation,
+                                   standardize=standardize,
+                                   permutations=permutations)
+
+        keep = ['g', 'p_sim_g', 'mean_g', 'min_g', 'max_g']
+        g_dict = {k: getattr(g, k) for k in keep}
+        self.output.data = g_dict
+        self.output.write()
+        logger.debug(self.output)
+
+
 PLUGIN_CLASS_EXPORTS = [
     ClusterProcess,
     AutocorrelationProcess,
-    WeightProcess
+    WeightProcess,
+    GearyCProcess,
+    GammaProcess
 ]
