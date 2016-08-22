@@ -141,3 +141,25 @@ class TestGaiaSpatialStatsViaParser(unittest.TestCase):
         finally:
             if process:
                 process.purge()
+
+    def test_process_classifier(self):
+        """Test ClassifierProcess Process"""
+        with open(os.path.join(testfile_path,
+                               'classifier_process.json')) as inf:
+            body_text = inf.read().replace('{basepath}', testfile_path)
+        process = json.loads(body_text, object_hook=deserialize)
+        try:
+            process.compute()
+            output = process.output.read(format=formats.JSON)
+            with open(os.path.join(
+                    testfile_path,
+                    'classifier_process_results.json')) as exp:
+                expected_json = json.load(exp)
+            self.assertIn('classifier', output)
+            self.assertEquals(expected_json['classifier'],
+                              output['classifier'])
+            self.assertIsNotNone(process.id)
+            self.assertIn(process.id, process.output.uri)
+        finally:
+            if process:
+                process.purge()

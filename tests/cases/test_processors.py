@@ -138,3 +138,25 @@ class TestGaiaSpatialStatsProcessors(unittest.TestCase):
         finally:
             if process:
                 process.purge()
+
+    def test_classifier(self):
+        """
+        Test ClassifierProcess for vector inputs
+        """
+        vector_io = VectorFileIO(
+            name='input', uri=os.path.join(testfile_path,
+                                           'baghdad_hospitals.geojson'))
+        process = GammaProcess('num_hospitals',
+                               inputs=[vector_io])
+        try:
+            process.compute()
+            with open(os.path.join(
+                    testfile_path,
+                    'classifier_process_results.json')) as exp:
+                expected_json = json.load(exp)
+            actual_json = process.output.read(format=formats.JSON)
+            self.assertEquals(expected_json['classifier'],
+                              actual_json['classifier'])
+        finally:
+            if process:
+                process.purge()
