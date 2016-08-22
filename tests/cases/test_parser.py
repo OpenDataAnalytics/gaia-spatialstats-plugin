@@ -156,8 +156,10 @@ class TestGaiaSpatialStatsViaParser(unittest.TestCase):
                     'classifier_process_results.json')) as exp:
                 expected_json = json.load(exp)
             self.assertIn('classifier', output)
-            self.assertEquals(expected_json['classifier'],
-                              output['classifier'])
+            self.assertEquals(expected_json['classifier']['classifier_name'],
+                              output['classifier']['classifier_name'])
+            self.assertEquals(expected_json['classifier']['gadf'],
+                              output['classifier']['gadf'])
             self.assertIsNotNone(process.id)
             self.assertIn(process.id, process.output.uri)
         finally:

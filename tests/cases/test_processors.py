@@ -155,8 +155,10 @@ class TestGaiaSpatialStatsProcessors(unittest.TestCase):
                     'classifier_process_results.json')) as exp:
                 expected_json = json.load(exp)
             actual_json = process.output.read(format=formats.JSON)
-            self.assertEquals(expected_json['classifier'],
-                              actual_json['classifier'])
+            self.assertEquals(expected_json['classifier']['classifier_name'],
+                              actual_json['classifier']['classifier_name'])
+            self.assertEquals(expected_json['classifier']['gadf'],
+                              actual_json['classifier']['gadf'])
         finally:
             if process:
                 process.purge()
