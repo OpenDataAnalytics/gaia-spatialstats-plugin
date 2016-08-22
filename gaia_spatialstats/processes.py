@@ -18,6 +18,8 @@
 ###############################################################################
 import logging
 import numpy as np
+import pandas as pd
+import json
 import pysal
 import gaia_spatialstats.pysal_weights as wt
 import gaia.formats as formats
@@ -331,10 +333,129 @@ class GammaProcess(GaiaProcess):
         logger.debug(self.output)
 
 
+class ClassifierProcess(GaiaProcess):
+    """
+    Classify for choropleth mapping.
+    default map_classifier: Natural_Breaks. Other options: Equal_Interval,
+    Fisher_Jenks, Fisher_Jenks_Sampled, HeadTail_Breaks, Jenks_Caspall,
+    Jenks_Caspall_Forced, Jenks_Caspall_Sampled, Max_P_Classifier,
+    Maximum_Breaks, Natural_Breaks, Quantiles, Percentiles, Std_Mean,
+    User_Defined
+
+    http://pysal.readthedocs.io/en/v1.11.0/library/esda/mapclassify.html
+
+    Returns the following Gamma index attributes as json:
+    gamma: float, value of Gamma index
+    p_sim_g: array, p-value based on permutations (one-sided)
+    mean_g: float, average of permuted Gamma values
+    min_g: float, minimum of permuted Gamma values
+    max_g: float, maximum of permuted Gamma values
+    """
+    required_inputs = (('input', formats.VECTOR),)
+    required_args = ('var_col')
+    optional_args = ('map_classifier', 'k', 'pick_optimal',
+                     'hinge', 'pct', 'initial', 'mindiff', 'multiples', 'bins')
+    default_output = formats.JSON
+    map_classifier = None
+    k = None
+    pick_optimal = None
+
+    # optional args for different classifier
+    hinge = None
+    pct = None
+    initial = None
+    mindiff = None
+    multiples = None
+    bins = None
+
+    def __init__(self, var_col, **kwargs):
+        self.var_col = var_col
+        super(ClassifierProcess, self).__init__(**kwargs)
+        if not self.output:
+            self.output = JsonFileIO(name='result',
+                                     uri=self.get_outpath())
+
+    def compute(self):
+        if not self.output:
+            self.output = JsonFileIO(name='result',
+                                     uri=self.get_outpath())
+        for input in self.inputs:
+            if input.name == 'input':
+                first_df = input.read()
+        col = self.var_col
+        map_classifier = self.map_classifier
+        pick_optimal = self.pick_optimal
+
+        # optional args for different classifier
+        opt_kwargs = dict(
+            k=self.k,
+            hinge=self.hinge,
+            pct=self.pct,
+            initial=self.initial,
+            mindiff=self.mindiff,
+            multiples=self.multiples,
+            bins=self.bins
+        )
+
+        opt_kwargs = {k: v for k, v in opt_kwargs.items() if v}
+
+        if pick_optimal and not map_classifier:
+            # pick optimal k-classifier based on k and gadf
+            y = np.array(first_df[col])
+            ks = pysal.esda.mapclassify.K_classifiers(y, pct=0.8)
+            map_classifier = ks.best.name
+            opt_kwargs['k'] = ks.best.k
+
+        elif not pick_optimal:
+            map_classifier = 'Natural_Breaks'
+
+        y = np.array(first_df[col])
+
+        # get classifier
+        classifier = getattr(pysal.esda.mapclassify, map_classifier)
+        result = classifier(y, **opt_kwargs)
+
+        # create labels and bin data
+        result_bins = list(result.bins)
+        labels = []
+        num_bins = len(result_bins) - 1
+        for i in range(0, num_bins):
+            if i == (num_bins):
+                labels.append('> {}'.format(result_bins[i]))
+            else:
+                labels.append('{} - {}'.format(result_bins[i],
+                                               result_bins[i+1]))
+
+        first_df['class'] = pd.cut(y,
+                                   result_bins,
+                                   labels=labels,
+                                   include_lowest=True)
+
+        # format output
+        result_counts = getattr(result, 'counts', None)
+        result_classes = {label: {'count': result_counts[idx]}
+                          for idx, label in enumerate(labels)}
+        output_dict = json.loads(first_df.to_json())
+        output_dict['classifier'] = dict(
+            classifier_name=map_classifier,
+            classes=result_classes
+        )
+
+        try:
+            output_dict['classifier']['gadf'] = result.get_gadf()
+        except NotImplementedError:
+            output_dict['classifier']['gadf'] = None
+
+        self.output.data = output_dict
+        self.output.write()
+        logger.debug(self.output)
+
+
 PLUGIN_CLASS_EXPORTS = [
     ClusterProcess,
     AutocorrelationProcess,
     WeightProcess,
     GearyCProcess,
-    GammaProcess
+    GammaProcess,
+    ClassifierProcess
 ]
