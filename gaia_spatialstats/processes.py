@@ -344,12 +344,12 @@ class ClassifierProcess(GaiaProcess):
 
     http://pysal.readthedocs.io/en/v1.11.0/library/esda/mapclassify.html
 
-    Returns the following Gamma index attributes as json:
-    gamma: float, value of Gamma index
-    p_sim_g: array, p-value based on permutations (one-sided)
-    mean_g: float, average of permuted Gamma values
-    min_g: float, minimum of permuted Gamma values
-    max_g: float, maximum of permuted Gamma values
+    Returns GeoJson of input data with "class" property for each feature
+    as well as a high level "classifier" attribute that includes:
+    classifier_name: string, name of map classifier used
+    classes: dict, with class label as key and counts of features in
+    class in each value
+    gadf: float, Goodness of absolute deviation of fit
     """
     required_inputs = (('input', formats.VECTOR),)
     required_args = ('var_col')
