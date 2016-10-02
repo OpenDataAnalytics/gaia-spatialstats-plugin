@@ -202,7 +202,7 @@ class WeightProcess(GaiaProcess):
 
 
 class GearyCProcess(GaiaProcess):
-    u"""
+    """
     Calculate Geary’s C statistic for spatial autocorrelation for input data.
     Default number of permutations = 999
     Uses contiguity weight (queen) and binary transformation by default.
