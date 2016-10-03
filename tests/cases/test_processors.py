@@ -146,8 +146,7 @@ class TestGaiaSpatialStatsProcessors(unittest.TestCase):
         vector_io = VectorFileIO(
             name='input', uri=os.path.join(testfile_path,
                                            'baghdad_hospitals.geojson'))
-        process = ClassifierProcess('num_hospitals',
-                               inputs=[vector_io])
+        process = ClassifierProcess('num_hospitals', inputs=[vector_io])
         try:
             process.compute()
             with open(os.path.join(
