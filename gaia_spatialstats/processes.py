@@ -203,12 +203,12 @@ class WeightProcess(GaiaProcess):
 
 class GearyCProcess(GaiaProcess):
     """
-    Calculate Geary’s C statistic for spatial autocorrelation for input data.
+    Calculate Geary's C statistic for spatial autocorrelation for input data.
     Default number of permutations = 999
     Uses contiguity weight (queen) and binary transformation by default.
     http://pysal.readthedocs.io/en/v1.11.0/library/esda/geary.html
 
-    Returns the following Geary's Cattributes as json:
+    Returns the following Geary's C attributes as json:
     C: float, value of Geary's C
     EC: float, expected value of C
     p_norm: float, p-value of C under normality assumption
