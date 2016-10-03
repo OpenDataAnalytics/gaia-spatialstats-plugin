@@ -23,7 +23,7 @@ import pysal
 from gaia import formats
 from gaia.geo.geo_inputs import VectorFileIO
 from gaia_spatialstats.processes import ClusterProcess, WeightProcess, \
-    AutocorrelationProcess, GearyCProcess, GammaProcess
+    AutocorrelationProcess, GearyCProcess, GammaProcess, ClassifierProcess
 
 testfile_path = os.path.join(os.path.dirname(
     os.path.realpath(__file__)), '../data')
@@ -146,7 +146,7 @@ class TestGaiaSpatialStatsProcessors(unittest.TestCase):
         vector_io = VectorFileIO(
             name='input', uri=os.path.join(testfile_path,
                                            'baghdad_hospitals.geojson'))
-        process = GammaProcess('num_hospitals',
+        process = ClassifierProcess('num_hospitals',
                                inputs=[vector_io])
         try:
             process.compute()
