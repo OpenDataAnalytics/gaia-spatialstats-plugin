@@ -406,7 +406,9 @@ class ClassifierProcess(GaiaProcess):
             map_classifier = ks.best.name
             opt_kwargs['k'] = ks.best.k
 
-        elif not pick_optimal:
+        elif not pick_optimal and map_classifier:
+            map_classifier = self.map_classifier
+        else:
             map_classifier = 'Natural_Breaks'
 
         y = np.array(first_df[col])
