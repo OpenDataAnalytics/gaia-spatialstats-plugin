@@ -17,13 +17,14 @@
 #  limitations under the License.
 ###############################################################################
 import pysal
-import gaia.formats as formats
+from gaia import formats, types
 from gaia.inputs import FileIO, UnsupportedFormatException
 
 
 class WeightFileIO(FileIO):
     """Read vector and write weight file data (such as .gal)"""
 
+    type = types.WEIGHT
     default_output = formats.WEIGHT
 
     def read(self, format=None):

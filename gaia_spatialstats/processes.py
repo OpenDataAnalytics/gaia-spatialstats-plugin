@@ -19,11 +19,12 @@
 import logging
 import numpy as np
 import pysal
+from gaia.inputs import JsonFileIO
+
 import gaia_spatialstats.pysal_weights as wt
-import gaia.formats as formats
+from gaia import formats, types
 from gaia.core import GaiaException
 from gaia_spatialstats.inputs import WeightFileIO
-from gaia.inputs import JsonFileIO
 from gaia.geo import GaiaProcess
 from gaia.geo.geo_inputs import VectorFileIO
 
@@ -46,9 +47,35 @@ class ClusterProcess(GaiaProcess):
     Is differ from expected Is significantly)
     lm_sig: boolean, True if p_sims is below 0.05
     """
-    required_inputs = (('input', formats.VECTOR),)
-    required_args = ('var_col')
-    optional_args = ('adjust_by_col')
+
+    #: Tuple of required inputs; name, type , max # of each; None = no max
+    required_inputs = [
+        {'description': 'Point dataset',
+         'type': types.VECTOR,
+         'max': 1
+         }
+    ]
+
+    #: Required arguments, data types as dict
+    required_args = [
+        {
+            'name': 'var_col',
+            'title': 'Variance attribute',
+            'description': 'Attribute to measure variance of',
+            'type': str
+        }
+    ]
+
+    #: Optional arguments, data types as dict
+    optional_args = [
+        {
+            'name': 'adjust_by_col',
+            'title': 'Adjustment attribute',
+            'description': 'Attribute to adjust variance by',
+            'type': str
+        }
+    ]
+
     default_output = formats.JSON
     adjust_by_col = None
 
@@ -58,6 +85,7 @@ class ClusterProcess(GaiaProcess):
         if not self.output:
             self.output = VectorFileIO(name='result',
                                        uri=self.get_outpath())
+
 
     def compute(self):
         if not self.output:
@@ -110,9 +138,41 @@ class AutocorrelationProcess(GaiaProcess):
     p_z_sim: float, p-value based on standard normal approximation
     from permutations
     """
-    required_inputs = (('input', formats.VECTOR),)
-    required_args = ('var_col')
-    optional_args = ('adjust_by_col', 'permutations')
+
+    #: Tuple of required inputs; name, type , max # of each; None = no max
+    required_inputs = [
+        {'description': 'Point dataset',
+         'type': types.VECTOR,
+         'max': 1
+         }
+    ]
+
+    #: Required arguments, data types as dict
+    required_args = [
+        {
+            'name': 'var_col',
+            'title': 'Variance attribute',
+            'description': 'Attribute to measure variance of',
+            'type': str
+        }
+    ]
+
+    #: Optional arguments, data types as dict
+    optional_args = [
+        {
+            'name': 'adjust_by_col',
+            'title': 'Adjustment attribute',
+            'description': 'Attribute to adjust variance by',
+            'type': str
+        },
+        {
+            'name': 'permutations',
+            'title': 'Permutations',
+            'description': '# of permutations to run',
+            'type': int
+        }
+    ]
+
     default_output = formats.JSON
     adjust_by_col = None
     permutations = None
@@ -125,9 +185,6 @@ class AutocorrelationProcess(GaiaProcess):
                                      uri=self.get_outpath())
 
     def compute(self):
-        if not self.output:
-            self.output = VectorFileIO(name='result',
-                                       uri=self.get_outpath())
         for input in self.inputs:
             if input.name == 'input':
                 first_df = input.read()
@@ -164,8 +221,25 @@ class WeightProcess(GaiaProcess):
     Calculate spatial weight.
     weight_type available includes: contiguity, knnW, distanceBandW, kernel
     """
-    required_inputs = (('input', formats.VECTOR),)
-    required_args = ('weight_type')
+
+    #: Tuple of required inputs; name, type , max # of each; None = no max
+    required_inputs = [
+        {'description': 'Point dataset',
+         'type': types.VECTOR,
+         'max': 1
+         }
+    ]
+
+    #: Required arguments, data types as dict
+    required_args = [
+        {
+            'name': 'weight_type',
+            'title': 'Weight type',
+            'description': 'contiguit, knnW, distanceBandW, or kernel',
+            'type': str
+        }
+    ]
+
     default_output = formats.WEIGHT
 
     def __init__(self, weight_type, **kwargs):
@@ -176,12 +250,7 @@ class WeightProcess(GaiaProcess):
                                        uri=self.get_outpath())
 
     def compute(self):
-        if not self.output:
-            self.output = VectorFileIO(name='result',
-                                       uri=self.get_outpath())
-        for input in self.inputs:
-            if input.name == 'input':
-                first_df = input.read()
+        first_df = self.inputs[0].read()
         weight_type = self.weight_type
         if weight_type == 'contiguity':
             w = wt.gpd_contiguity(first_df)

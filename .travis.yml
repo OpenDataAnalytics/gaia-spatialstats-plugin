@@ -20,6 +20,7 @@ services:
 
 python:
   - "2.7"
+  - "
 
 cache:
   directories:
