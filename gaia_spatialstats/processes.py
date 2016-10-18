@@ -86,7 +86,6 @@ class ClusterProcess(GaiaProcess):
             self.output = VectorFileIO(name='result',
                                        uri=self.get_outpath())
 
-
     def compute(self):
         if not self.output:
             self.output = VectorFileIO(name='result',
