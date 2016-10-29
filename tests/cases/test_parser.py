@@ -77,6 +77,50 @@ class TestGaiaSpatialStatsViaParser(unittest.TestCase):
             if process:
                 process.purge()
 
+    def test_process_gamma(self):
+        """Test GammaProcess Process"""
+        with open(os.path.join(testfile_path,
+                               'gamma_process.json')) as inf:
+            body_text = inf.read().replace('{basepath}', testfile_path)
+        process = json.loads(body_text, object_hook=deserialize)
+        try:
+            process.compute()
+            output = process.output.read(format=formats.JSON)
+            with open(os.path.join(
+                    testfile_path,
+                    'gamma_process_results.json')) as exp:
+                expected_json = json.load(exp)
+            self.assertIn('g', output)
+            self.assertEquals(expected_json['g'],
+                              output['g'])
+            self.assertIsNotNone(process.id)
+            self.assertIn(process.id, process.output.uri)
+        finally:
+            if process:
+                process.purge()
+
+    def test_process_gearyc(self):
+        """Test GearyCProcess Process"""
+        with open(os.path.join(testfile_path,
+                               'gearyc_process.json')) as inf:
+            body_text = inf.read().replace('{basepath}', testfile_path)
+        process = json.loads(body_text, object_hook=deserialize)
+        try:
+            process.compute()
+            output = process.output.read(format=formats.JSON)
+            with open(os.path.join(
+                    testfile_path,
+                    'gearyc_process_results.json')) as exp:
+                expected_json = json.load(exp)
+            self.assertIn('C', output)
+            self.assertEquals(expected_json['C'],
+                              output['C'])
+            self.assertIsNotNone(process.id)
+            self.assertIn(process.id, process.output.uri)
+        finally:
+            if process:
+                process.purge()
+
     def test_process_weight(self):
         """Test Weight Process"""
         with open(os.path.join(testfile_path,

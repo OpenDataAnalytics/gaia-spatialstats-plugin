@@ -23,7 +23,7 @@ import pysal
 from gaia import formats
 from gaia.geo.geo_inputs import VectorFileIO
 from gaia_spatialstats.processes import ClusterProcess, WeightProcess, \
-    AutocorrelationProcess
+    AutocorrelationProcess, GearyCProcess, GammaProcess
 
 testfile_path = os.path.join(os.path.dirname(
     os.path.realpath(__file__)), '../data')
@@ -59,7 +59,8 @@ class TestGaiaSpatialStatsProcessors(unittest.TestCase):
         vector_io = VectorFileIO(
             name='input', uri=os.path.join(testfile_path,
                                            'baghdad_hospitals.geojson'))
-        process = AutocorrelationProcess('num_hospitals', inputs=[vector_io])
+        process = AutocorrelationProcess('num_hospitals',
+                                         inputs=[vector_io])
         try:
             process.compute()
             with open(os.path.join(
@@ -90,6 +91,50 @@ class TestGaiaSpatialStatsProcessors(unittest.TestCase):
             actual = process.output.read(format=formats.WEIGHT)
             self.assertEquals(expected_w.n,
                               actual.n)
+        finally:
+            if process:
+                process.purge()
+
+    def test_gearyc(self):
+        """
+        Test GearyCProcess for vector inputs
+        """
+        vector_io = VectorFileIO(
+            name='input', uri=os.path.join(testfile_path,
+                                           'baghdad_hospitals.geojson'))
+        process = GearyCProcess('num_hospitals',
+                                inputs=[vector_io])
+        try:
+            process.compute()
+            with open(os.path.join(
+                    testfile_path,
+                    'gearyc_process_results.json')) as exp:
+                expected_json = json.load(exp)
+            actual_json = process.output.read(format=formats.JSON)
+            self.assertEquals(expected_json['C'],
+                              actual_json['C'])
+        finally:
+            if process:
+                process.purge()
+
+    def test_gamma(self):
+        """
+        Test GammaProcess for vector inputs
+        """
+        vector_io = VectorFileIO(
+            name='input', uri=os.path.join(testfile_path,
+                                           'baghdad_hospitals.geojson'))
+        process = GammaProcess('num_hospitals',
+                               inputs=[vector_io])
+        try:
+            process.compute()
+            with open(os.path.join(
+                    testfile_path,
+                    'gamma_process_results.json')) as exp:
+                expected_json = json.load(exp)
+            actual_json = process.output.read(format=formats.JSON)
+            self.assertEquals(expected_json['g'],
+                              actual_json['g'])
         finally:
             if process:
                 process.purge()
