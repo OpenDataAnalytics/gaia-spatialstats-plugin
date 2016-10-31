@@ -20,10 +20,12 @@ import json
 import os
 import unittest
 import pysal
+
 from gaia import formats
 from gaia.geo.geo_inputs import VectorFileIO
 from gaia_spatialstats.processes import ClusterProcess, WeightProcess, \
     AutocorrelationProcess, GearyCProcess, GammaProcess, ClassifierProcess
+
 
 testfile_path = os.path.join(os.path.dirname(
     os.path.realpath(__file__)), '../data')

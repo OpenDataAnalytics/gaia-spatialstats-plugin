@@ -17,6 +17,7 @@
 #  limitations under the License.
 ###############################################################################
 import pysal
+
 import gaia.formats as formats
 from gaia.inputs import FileIO, UnsupportedFormatException
 

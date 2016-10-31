@@ -21,13 +21,13 @@ import numpy as np
 import pandas as pd
 import json
 import pysal
-import gaia_spatialstats.pysal_weights as wt
+
 import gaia.formats as formats
-from gaia.core import GaiaException
-from gaia_spatialstats.inputs import WeightFileIO
 from gaia.inputs import JsonFileIO
 from gaia.geo import GaiaProcess
 from gaia.geo.geo_inputs import VectorFileIO
+import gaia_spatialstats.pysal_weights as wt
+from gaia_spatialstats.inputs import WeightFileIO
 
 logger = logging.getLogger('gaia')
 

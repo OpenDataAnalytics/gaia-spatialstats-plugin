@@ -19,12 +19,11 @@
 import json
 import os
 import unittest
-
 import pysal
 
 from gaia import formats
 from gaia.parser import deserialize
-from gaia.core import config
+
 
 testfile_path = os.path.join(os.path.dirname(
     os.path.realpath(__file__)), '../data')
