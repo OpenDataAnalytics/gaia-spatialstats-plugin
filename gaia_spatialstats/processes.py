@@ -284,12 +284,46 @@ class GearyCProcess(GaiaProcess):
     p_z_sim: float, p-value based on standard normal approximation
     from permutations (one-tailed)
     """
-    required_inputs = (('input', formats.VECTOR),)
+
     required_args = ('var_col')
     optional_args = ('transformation', 'permutations')
     default_output = formats.JSON
     transformation = None
     permutations = None
+
+    #: Tuple of required inputs; name, type , max # of each; None = no max
+    required_inputs = [
+        {'description': 'Point dataset',
+         'type': types.VECTOR,
+         'max': 1
+         }
+    ]
+
+    #: Required arguments, data types as dict
+    required_args = [
+        {
+            'name': 'var_col',
+            'title': 'Variable column',
+            'description': 'Input data column to use as variable',
+            'type': str
+        }
+    ]
+
+    #: Optional arguments, data types as dict
+    optional_args = [
+        {
+            'name': 'transformation',
+            'title': 'Transformation',
+            'description': 'Weights transformation, default is binary.',
+            'type': str
+        },
+        {
+            'name': 'permutations',
+            'title': 'Permutations',
+            'description': '# of permutations for calculating pseudo-p_values',
+            'type': int
+        }
+    ]
 
     def __init__(self, var_col, **kwargs):
         self.var_col = var_col
@@ -346,13 +380,52 @@ class GammaProcess(GaiaProcess):
     min_g: float, minimum of permuted Gamma values
     max_g: float, maximum of permuted Gamma values
     """
-    required_inputs = (('input', formats.VECTOR),)
-    required_args = ('var_col')
+
     optional_args = ('operation', 'standardize', 'permutations')
     default_output = formats.JSON
     operation = None
     permutations = None
     standardize = None
+
+    #: Tuple of required inputs; name, type , max # of each; None = no max
+    required_inputs = [
+        {'description': 'Point dataset',
+         'type': types.VECTOR,
+         'max': 1
+         }
+    ]
+
+    #: Required arguments, data types as dict
+    required_args = [
+        {
+            'name': 'var_col',
+            'title': 'Variable column',
+            'description': 'Input data column to use as variable',
+            'type': str
+        }
+    ]
+
+    #: Optional arguments, data types as dict
+    optional_args = [
+        {
+            'name': 'operation',
+            'title': 'Operation',
+            'description': 'Attribute similarity function: "c", "s"", or "a"',
+            'type': str
+        },
+        {
+            'name': 'standardize',
+            'title': 'Standardize',
+            'description': 'Standardize to mean 0 and variance 1 (yes or no)',
+            'type': str
+        },
+        {
+            'name': 'permutations',
+            'title': 'Permutations',
+            'description': '# of permutations for calculating pseudo-p_values',
+            'type': int
+        }
+    ]
 
     def __init__(self, var_col, **kwargs):
         self.var_col = var_col
