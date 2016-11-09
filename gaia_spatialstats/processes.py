@@ -22,8 +22,9 @@ import pandas as pd
 import json
 import pysal
 
-import gaia.formats as formats
 from gaia.inputs import JsonFileIO
+from gaia import formats, types
+from gaia.core import GaiaException
 from gaia.geo import GaiaProcess
 from gaia.geo.geo_inputs import VectorFileIO
 import gaia_spatialstats.pysal_weights as wt
@@ -48,9 +49,35 @@ class ClusterProcess(GaiaProcess):
     Is differ from expected Is significantly)
     lm_sig: boolean, True if p_sims is below 0.05
     """
-    required_inputs = (('input', formats.VECTOR),)
-    required_args = ('var_col')
-    optional_args = ('adjust_by_col')
+
+    #: Tuple of required inputs; name, type , max # of each; None = no max
+    required_inputs = [
+        {'description': 'Point dataset',
+         'type': types.VECTOR,
+         'max': 1
+         }
+    ]
+
+    #: Required arguments, data types as dict
+    required_args = [
+        {
+            'name': 'var_col',
+            'title': 'Variance attribute',
+            'description': 'Attribute to measure variance of',
+            'type': str
+        }
+    ]
+
+    #: Optional arguments, data types as dict
+    optional_args = [
+        {
+            'name': 'adjust_by_col',
+            'title': 'Adjustment attribute',
+            'description': 'Attribute to adjust variance by',
+            'type': str
+        }
+    ]
+
     default_output = formats.JSON
     adjust_by_col = None
 
@@ -112,9 +139,41 @@ class AutocorrelationProcess(GaiaProcess):
     p_z_sim: float, p-value based on standard normal approximation
     from permutations
     """
-    required_inputs = (('input', formats.VECTOR),)
-    required_args = ('var_col')
-    optional_args = ('adjust_by_col', 'permutations')
+
+    #: Tuple of required inputs; name, type , max # of each; None = no max
+    required_inputs = [
+        {'description': 'Point dataset',
+         'type': types.VECTOR,
+         'max': 1
+         }
+    ]
+
+    #: Required arguments, data types as dict
+    required_args = [
+        {
+            'name': 'var_col',
+            'title': 'Variance attribute',
+            'description': 'Attribute to measure variance of',
+            'type': str
+        }
+    ]
+
+    #: Optional arguments, data types as dict
+    optional_args = [
+        {
+            'name': 'adjust_by_col',
+            'title': 'Adjustment attribute',
+            'description': 'Attribute to adjust variance by',
+            'type': str
+        },
+        {
+            'name': 'permutations',
+            'title': 'Permutations',
+            'description': '# of permutations to run',
+            'type': int
+        }
+    ]
+
     default_output = formats.JSON
     adjust_by_col = None
     permutations = None
@@ -127,9 +186,6 @@ class AutocorrelationProcess(GaiaProcess):
                                      uri=self.get_outpath())
 
     def compute(self):
-        if not self.output:
-            self.output = VectorFileIO(name='result',
-                                       uri=self.get_outpath())
         for input in self.inputs:
             if input.name == 'input':
                 first_df = input.read()
@@ -166,8 +222,25 @@ class WeightProcess(GaiaProcess):
     Calculate spatial weight.
     weight_type available includes: contiguity, knnW, distanceBandW, kernel
     """
-    required_inputs = (('input', formats.VECTOR),)
-    required_args = ('weight_type')
+
+    #: Tuple of required inputs; name, type , max # of each; None = no max
+    required_inputs = [
+        {'description': 'Point dataset',
+         'type': types.VECTOR,
+         'max': 1
+         }
+    ]
+
+    #: Required arguments, data types as dict
+    required_args = [
+        {
+            'name': 'weight_type',
+            'title': 'Weight type',
+            'description': 'contiguit, knnW, distanceBandW, or kernel',
+            'type': str
+        }
+    ]
+
     default_output = formats.WEIGHT
 
     def __init__(self, weight_type, **kwargs):
@@ -178,12 +251,7 @@ class WeightProcess(GaiaProcess):
                                        uri=self.get_outpath())
 
     def compute(self):
-        if not self.output:
-            self.output = VectorFileIO(name='result',
-                                       uri=self.get_outpath())
-        for input in self.inputs:
-            if input.name == 'input':
-                first_df = input.read()
+        first_df = self.inputs[0].read()
         weight_type = self.weight_type
         if weight_type == 'contiguity':
             w = wt.gpd_contiguity(first_df)
@@ -218,12 +286,46 @@ class GearyCProcess(GaiaProcess):
     p_z_sim: float, p-value based on standard normal approximation
     from permutations (one-tailed)
     """
-    required_inputs = (('input', formats.VECTOR),)
+
     required_args = ('var_col')
     optional_args = ('transformation', 'permutations')
     default_output = formats.JSON
     transformation = None
     permutations = None
+
+    #: Tuple of required inputs; name, type , max # of each; None = no max
+    required_inputs = [
+        {'description': 'Point dataset',
+         'type': types.VECTOR,
+         'max': 1
+         }
+    ]
+
+    #: Required arguments, data types as dict
+    required_args = [
+        {
+            'name': 'var_col',
+            'title': 'Variable column',
+            'description': 'Input data column to use as variable',
+            'type': str
+        }
+    ]
+
+    #: Optional arguments, data types as dict
+    optional_args = [
+        {
+            'name': 'transformation',
+            'title': 'Transformation',
+            'description': 'Weights transformation, default is binary.',
+            'type': str
+        },
+        {
+            'name': 'permutations',
+            'title': 'Permutations',
+            'description': '# of permutations for calculating pseudo-p_values',
+            'type': int
+        }
+    ]
 
     def __init__(self, var_col, **kwargs):
         self.var_col = var_col
@@ -280,13 +382,52 @@ class GammaProcess(GaiaProcess):
     min_g: float, minimum of permuted Gamma values
     max_g: float, maximum of permuted Gamma values
     """
-    required_inputs = (('input', formats.VECTOR),)
-    required_args = ('var_col')
+
     optional_args = ('operation', 'standardize', 'permutations')
     default_output = formats.JSON
     operation = None
     permutations = None
     standardize = None
+
+    #: Tuple of required inputs; name, type , max # of each; None = no max
+    required_inputs = [
+        {'description': 'Point dataset',
+         'type': types.VECTOR,
+         'max': 1
+         }
+    ]
+
+    #: Required arguments, data types as dict
+    required_args = [
+        {
+            'name': 'var_col',
+            'title': 'Variable column',
+            'description': 'Input data column to use as variable',
+            'type': str
+        }
+    ]
+
+    #: Optional arguments, data types as dict
+    optional_args = [
+        {
+            'name': 'operation',
+            'title': 'Operation',
+            'description': 'Attribute similarity function: "c", "s"", or "a"',
+            'type': str
+        },
+        {
+            'name': 'standardize',
+            'title': 'Standardize',
+            'description': 'Standardize to mean 0 and variance 1 (yes or no)',
+            'type': str
+        },
+        {
+            'name': 'permutations',
+            'title': 'Permutations',
+            'description': '# of permutations for calculating pseudo-p_values',
+            'type': int
+        }
+    ]
 
     def __init__(self, var_col, **kwargs):
         self.var_col = var_col
