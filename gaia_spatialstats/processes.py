@@ -512,55 +512,76 @@ class ClassifierProcess(GaiaProcess):
         {
             'name': 'map_classifier',
             'title': 'Map Classifier',
-            'description': 'Classifier name: "Natural_Breaks" (default), "Equal_Interval", "Fisher_Jenks", "Fisher_Jenks_Sampled", "HeadTail_Breaks", "Jenks_Caspall", "Jenks_Caspall_Forced", "Jenks_Caspall_Sampled", "Max_P_Classifier", "Maximum_Breaks", "Natural_Breaks", "Quantiles", "Percentiles", "Std_Mean", or "User_Defined"',
+            'description': 'Classifier name: "Natural_Breaks" (default), '
+                           '"Equal_Interval", "Fisher_Jenks", '
+                           '"Fisher_Jenks_Sampled", "HeadTail_Breaks", '
+                           '"Jenks_Caspall", "Jenks_Caspall_Forced", '
+                           '"Jenks_Caspall_Sampled", "Max_P_Classifier", '
+                           '"Maximum_Breaks", "Natural_Breaks", '
+                           '"Quantiles", "Percentiles", "Std_Mean", or '
+                           '"User_Defined"',
             'type': str
         },
         {
             'name': 'k',
             'title': 'K',
-            'description': 'Number of classes. Can be used with all map classifiers.',
+            'description': 'Number of classes. Can be used with all '
+                           'map classifiers.',
             'type': int
         },
         {
             'name': 'pick_optimal',
             'title': 'Pick Optimal',
-            'description': 'Boolean value. Determines whether or not to evaluate all k-classifiers and pick optimal based on k and GADF',
+            'description': 'Boolean value. Determines whether or not '
+                           'to evaluate all k-classifiers and pick '
+                           'optimal based on k and GADF',
             'type': bool
         },
         {
             'name': 'hinge',
             'title': 'Hinge',
-            'description': 'Multiplier for IQR. To be used with Box_Plot map classifier. Default: 1.5',
+            'description': 'Multiplier for IQR. To be used with Box_Plot '
+                           'map classifier. Default: 1.5',
             'type': float
         },
         {
             'name': 'pct',
             'title': 'Percentiles',
-            'description': 'List of percentiles to classify observations into. To be used with Percentiles map classifier. Default: [1,10,50,90,99,100]',
+            'description': 'List of percentiles to classify observations'
+                           ' into. To be used with Percentiles map '
+                           'classifier. Default: [1,10,50,90,99,100]',
             'type': list
         },
         {
             'name': 'initial',
             'title': 'Initial',
-            'description': 'Number of initial solutions to generate. To be used with Natural_Breaks map classifier. Default: 100',
+            'description': 'Number of initial solutions to generate. To '
+                           'be used with Natural_Breaks map classifier. '
+                           'Default: 100',
             'type': int
         },
         {
             'name': 'mindiff',
             'title': 'Minimum Difference',
-            'description': 'Minimum difference between class breaks. To be used with Maximum_Breaks classifier. Default: 0',
+            'description': 'Minimum difference between class breaks. '
+                           'To be used with Maximum_Breaks classifier. '
+                           'Default: 0',
             'type': float
         },
         {
             'name': 'multiples',
             'title': 'Multiples',
-            'description': 'The multiples of the standard deviation to add/subtract from the sample mean to define the bins. To be used with Std_Mean map classifier. Default: [-2, -1, 1, 2]',
+            'description': 'The multiples of the standard deviation to '
+                           'add/subtract from the sample mean to define '
+                           'the bins. To be used with Std_Mean map '
+                           'classifier. Default: [-2, -1, 1, 2]',
             'type': list
         },
         {
             'name': 'bins',
             'title': 'Bins',
-            'description': 'Upper bounds of each class. Can be set with all available map classifiers.',
+            'description': 'Upper bounds of each class. Can be set with '
+                           'all available map classifiers.',
             'type': list
         },
     ]
